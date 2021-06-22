@@ -1,1 +1,76 @@
-<h1>Hello World!</h1>
+<!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="UTF-8">
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        </head>
+        <body>
+
+            <script>
+                $.getJSON("https://api.sibr.dev/proxy/database/teamElectionStats", {
+                                'id': '3f8bbb15-61c0-4e3f-8e4a-907a5fb1565e'
+                            }, createTable)
+
+                function createTable(electionStats){
+
+                    var wills = electionStats.wills
+                    wills.sort(function(a,b){
+                        return b.percent - a.percent
+                    })
+
+                    var individualPercentages = getIndividualPercentages(wills)
+                    
+
+                    var willTable = document.createElement('table')
+                    var tableBody = document.createElement('tbody')
+                    var matrix = calculateProbabilityMatrix(individualPercentages)
+                    matrix.forEach(pcentRow => {
+                        var row = document.createElement('tr')
+                        pcentRow.forEach(pcentCell => {
+                            var cell = document.createElement('td')
+                            cell.appendChild(document.createTextNode(pcentCell * 100))
+                            row.appendChild(cell)
+                        })
+                        tableBody.appendChild(row)
+                    })
+                    willTable.appendChild(tableBody)
+                    document.body.appendChild(willTable)
+                }
+
+
+                function getIndividualPercentages(wills){
+                    var percentages = []
+                    var total = 0
+                    wills.forEach(will => {total += (parseFloat(will.percent))})
+                    
+                    for (let i = 0; i < wills.length; i++){
+                        percentages[i] = wills[i].percent / total
+                    }
+                    return percentages
+                }
+
+                // function calculateSecondPickPercentages(probabilityMatrix){
+                //     var secondPickPercentages = []
+                //     for (let x = 0)
+                // }
+
+                function calculateProbabilityMatrix(individualPercentages){
+                    var percentages = []
+                    for (let x = 0; x < individualPercentages.length; x++){
+                        percentages[x] = []
+                        var remaining = 1 - individualPercentages[x]
+                        for (let y = 0; y < individualPercentages.length; y++){
+                            var yProb = 0
+                            if (x != y){
+                                yProb = individualPercentages[y]/remaining
+                            }
+                            percentages[x][y] = (yProb * individualPercentages[x])
+                        }
+                    }
+                    return percentages
+                }
+
+
+            </script>
+        </body>
+    </html>
