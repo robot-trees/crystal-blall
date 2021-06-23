@@ -1,11 +1,40 @@
 <!DOCTYPE html>
     <html>
         <head>
+            <title>Will Probabilities</title>
             <meta charset="UTF-8">
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+            <style>
+                body{
+                    align-content: center;
+                    font-family: arial;
+                }
+                table, th, td{
+                    border: 1px solid black;
+                }
+                td{
+                    text-align: center;
+                }
+                table {
+                    margin-left: auto;
+                    margin-right: auto;
+                    border-collapse: collapse;
+                    width: 50%;
+                    table-layout: fixed;
+                }
+                div {
+                    align-content: center;
+                    padding: 10px;
+                }
+            </style>
         </head>
         <body>
+            <div id='matrixDiv'>
 
+            </div>
+            <div id='pickTableDiv'>
+                
+            </div>
             <script>
                 $.getJSON("https://api.sibr.dev/proxy/database/teamElectionStats", {
                                 'id': '3f8bbb15-61c0-4e3f-8e4a-907a5fb1565e'
@@ -20,21 +49,57 @@
 
                     var individualPercentages = getIndividualPercentages(wills)
                     
+                    // var freeWillMatrix = calculate3DProbabilityMatrix(individualPercentages)
+                    // freeWillMatrix.forEach(innerMatrix => printTable(innerMatrix))
 
+                    var matrix = calculateProbabilityMatrix(individualPercentages)
+                    printTable(matrix)
+                    
+                    var secondPickPercentages = calculate2ndPickProbabilities(matrix)
+
+                    var pickTable = document.createElement('table')
+                    var tableBody = document.createElement('tbody')
+
+                    var tableHeader = document.createElement('tr')
+                    var firstPickRow = document.createElement('tr')
+                    var secondPickRow = document.createElement('tr')
+                    var totalPickRow = document.createElement('tr')
+                    for (let i = 0; i < wills.length; i++){
+                        var tableCell = document.createElement('th')
+                        tableCell.appendChild(document.createTextNode(wills[i].id))
+                        tableHeader.appendChild(tableCell)
+                        tableCell = document.createElement('td')
+                        tableCell.appendChild(document.createTextNode(round(individualPercentages[i] * 100, 2)))
+                        firstPickRow.appendChild(tableCell)
+                        tableCell = document.createElement('td')
+                        tableCell.appendChild(document.createTextNode(round(secondPickPercentages[i] * 100, 2)))
+                        secondPickRow.appendChild(tableCell)
+                        tableCell = document.createElement('td')
+                        tableCell.appendChild(document.createTextNode(round((secondPickPercentages[i] + individualPercentages[i]) * 100, 2)))
+                        totalPickRow.appendChild(tableCell)
+                    }
+                    tableBody.appendChild(tableHeader)
+                    tableBody.appendChild(firstPickRow)
+                    tableBody.appendChild(secondPickRow)
+                    tableBody.appendChild(totalPickRow)
+                    pickTable.appendChild(tableBody)
+                    document.getElementById('pickTableDiv').appendChild(pickTable)
+                }
+
+                function printTable(probabilityMatrix){
                     var willTable = document.createElement('table')
                     var tableBody = document.createElement('tbody')
-                    var matrix = calculateProbabilityMatrix(individualPercentages)
-                    matrix.forEach(pcentRow => {
-                        var row = document.createElement('tr')
-                        pcentRow.forEach(pcentCell => {
-                            var cell = document.createElement('td')
-                            cell.appendChild(document.createTextNode(pcentCell * 100))
-                            row.appendChild(cell)
+                    probabilityMatrix.forEach(matrixRow => {
+                        var tableRow = document.createElement('tr')
+                        matrixRow.forEach(matrixCell => {
+                            var tableCell = document.createElement('td')
+                            tableCell.appendChild(document.createTextNode(round(matrixCell * 100, 2)))
+                            tableRow.appendChild(tableCell)
                         })
-                        tableBody.appendChild(row)
+                        tableBody.appendChild(tableRow)
                     })
                     willTable.appendChild(tableBody)
-                    document.body.appendChild(willTable)
+                    document.getElementById('matrixDiv').appendChild(willTable)
                 }
 
 
@@ -48,11 +113,6 @@
                     }
                     return percentages
                 }
-
-                // function calculateSecondPickPercentages(probabilityMatrix){
-                //     var secondPickPercentages = []
-                //     for (let x = 0)
-                // }
 
                 function calculateProbabilityMatrix(individualPercentages){
                     var percentages = []
@@ -70,6 +130,47 @@
                     return percentages
                 }
 
+                function calculate3DProbabilityMatrix(individualPercentages){
+                    var percentages = []
+                    for (let x = 0; x < individualPercentages.length; x++){
+                        percentages[x] = []
+                        var xProb = individualPercentages[x]
+                        var remaining = 1 - individualPercentages[x]
+                        for (let y = 0; y < individualPercentages.length; y++){
+                            percentages[x][y] = []
+                            var stillRemaining = remaining - individualPercentages[y]
+                            var yProb = 0
+                            if (x != y){
+                                yProb = individualPercentages[y]/remaining
+                            }
+                            for (let z = 0; z < individualPercentages.length; z++){
+                                zProb = 0
+                                if (x != z && y != z){
+                                    zProb = individualPercentages[z]/stillRemaining
+                                }
+                                percentages[x][y][z] = xProb * yProb * zProb
+                            }
+                        }
+                    }
+                    return percentages
+                }
+
+                function calculate2ndPickProbabilities(probabilityMatrix){
+                    var pickProbabilities = []
+                    for (let y = 0; y < probabilityMatrix.length; y++){
+                        var pickProbability = 0
+                        for (let x = 0; x < probabilityMatrix.length; x++){
+                            pickProbability += probabilityMatrix[x][y]
+                        }
+                        pickProbabilities[y] = pickProbability
+                    }
+                    return pickProbabilities
+                }
+
+                function round(toBeRounded, decimalPlaces){
+                    var multiplier = Math.pow(10, decimalPlaces)
+                    return Math.round(toBeRounded * multiplier) / multiplier
+                }
 
             </script>
         </body>
