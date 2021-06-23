@@ -36,6 +36,12 @@
                 
             </div>
             <script>
+
+                $.ajaxSetup({async:false})
+
+                var willNames = []
+                $.getJSON("https://api.sibr.dev/proxy/database/offseasonSetup", populateWillNames)
+
                 $.getJSON("https://api.sibr.dev/proxy/database/teamElectionStats", {
                                 'id': '3f8bbb15-61c0-4e3f-8e4a-907a5fb1565e'
                             }, createTable)
@@ -60,33 +66,34 @@
                     var pickTable = document.createElement('table')
                     var tableBody = document.createElement('tbody')
 
-                    var tableHeader = document.createElement('tr')
-                    var firstPickRow = document.createElement('tr')
-                    var secondPickRow = document.createElement('tr')
-                    var totalPickRow = document.createElement('tr')
                     for (let i = 0; i < wills.length; i++){
+                        var tableRow = document.createElement('tr')
                         var tableCell = document.createElement('th')
-                        tableCell.appendChild(document.createTextNode(wills[i].id))
-                        tableHeader.appendChild(tableCell)
+                        tableCell.appendChild(document.createTextNode(willNames[wills[i].id]))
+                        tableRow.appendChild(tableCell)
                         tableCell = document.createElement('td')
-                        tableCell.appendChild(document.createTextNode(round(individualPercentages[i] * 100, 2)))
-                        firstPickRow.appendChild(tableCell)
+                        tableCell.appendChild(document.createTextNode(round(wills[i].percent, 2)))
+                        tableRow.appendChild(tableCell)
                         tableCell = document.createElement('td')
                         tableCell.appendChild(document.createTextNode(round(secondPickPercentages[i] * 100, 2)))
-                        secondPickRow.appendChild(tableCell)
+                        tableRow.appendChild(tableCell)
                         tableCell = document.createElement('td')
                         tableCell.appendChild(document.createTextNode(round((secondPickPercentages[i] + individualPercentages[i]) * 100, 2)))
-                        totalPickRow.appendChild(tableCell)
+                        tableRow.appendChild(tableCell)
+                        tableBody.appendChild(tableRow)
                     }
-                    tableBody.appendChild(tableHeader)
-                    tableBody.appendChild(firstPickRow)
-                    tableBody.appendChild(secondPickRow)
-                    tableBody.appendChild(totalPickRow)
                     pickTable.appendChild(tableBody)
                     document.getElementById('pickTableDiv').appendChild(pickTable)
                 }
 
+                function populateWillNames(offSeasonData){
+                    offSeasonData.wills.forEach(will => {
+                        willNames[will.id] = will.title
+                    })
+                }
+
                 function printTable(probabilityMatrix){
+
                     var willTable = document.createElement('table')
                     var tableBody = document.createElement('tbody')
                     probabilityMatrix.forEach(matrixRow => {
