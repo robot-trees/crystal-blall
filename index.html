@@ -35,6 +35,9 @@
             <div id='pickTableDiv'>
                 
             </div>
+            <div id='comboTableDiv'>
+                
+            </div>
             <script>
 
                 $.ajaxSetup({async:false})
@@ -48,27 +51,27 @@
 
                 function createTable(electionStats){
 
-                    var wills = electionStats.wills
+                    let wills = electionStats.wills
                     wills.sort(function(a,b){
                         return b.percent - a.percent
                     })
 
-                    var individualPercentages = getIndividualPercentages(wills)
+                    let individualPercentages = getIndividualPercentages(wills)
                     
                     // var freeWillMatrix = calculate3DProbabilityMatrix(individualPercentages)
                     // freeWillMatrix.forEach(innerMatrix => printTable(innerMatrix))
 
-                    var matrix = calculateProbabilityMatrix(individualPercentages)
+                    let matrix = calculateProbabilityMatrix(individualPercentages)
                     printTable(matrix)
                     
-                    var secondPickPercentages = calculate2ndPickProbabilities(matrix)
+                    let secondPickPercentages = calculate2ndPickProbabilities(matrix)
 
-                    var pickTable = document.createElement('table')
-                    var tableBody = document.createElement('tbody')
+                    let pickTable = document.createElement('table')
+                    let tableBody = document.createElement('tbody')
 
                     for (let i = 0; i < wills.length; i++){
-                        var tableRow = document.createElement('tr')
-                        var tableCell = document.createElement('th')
+                        let tableRow = document.createElement('tr')
+                        let tableCell = document.createElement('th')
                         tableCell.appendChild(document.createTextNode(willNames[wills[i].id]))
                         tableRow.appendChild(tableCell)
                         tableCell = document.createElement('td')
@@ -84,6 +87,27 @@
                     }
                     pickTable.appendChild(tableBody)
                     document.getElementById('pickTableDiv').appendChild(pickTable)
+
+
+                    let orderedCombos = calculateOrderedCombinationProbabilities(wills, matrix)
+                    orderedCombos.sort(function(a,b){
+                        return b.value - a.value
+                    })
+
+                    let comboTable = document.createElement('table')
+                    let comboTableBody = document.createElement('tbody')
+                    for (let i = 0; i < 10 && i < orderedCombos.length; i++){
+                        let row = document.createElement('tr')
+                        let cell = document.createElement('th')
+                        cell.appendChild(document.createTextNode(getCombinationDisplayString(orderedCombos[i].combination)))
+                        row.appendChild(cell)
+                        cell = document.createElement('td')
+                        cell.appendChild(document.createTextNode(round(orderedCombos[i].value * 100,2)))
+                        row.appendChild(cell)
+                        comboTableBody.appendChild(row)
+                    }
+                    comboTable.appendChild(comboTableBody)
+                    document.getElementById('comboTableDiv').appendChild(comboTable)
                 }
 
                 function populateWillNames(offSeasonData){
@@ -94,12 +118,12 @@
 
                 function printTable(probabilityMatrix){
 
-                    var willTable = document.createElement('table')
-                    var tableBody = document.createElement('tbody')
+                    let willTable = document.createElement('table')
+                    let tableBody = document.createElement('tbody')
                     probabilityMatrix.forEach(matrixRow => {
-                        var tableRow = document.createElement('tr')
+                        let tableRow = document.createElement('tr')
                         matrixRow.forEach(matrixCell => {
-                            var tableCell = document.createElement('td')
+                            let tableCell = document.createElement('td')
                             tableCell.appendChild(document.createTextNode(round(matrixCell * 100, 2)))
                             tableRow.appendChild(tableCell)
                         })
@@ -109,10 +133,9 @@
                     document.getElementById('matrixDiv').appendChild(willTable)
                 }
 
-
                 function getIndividualPercentages(wills){
-                    var percentages = []
-                    var total = 0
+                    let percentages = []
+                    let total = 0
                     wills.forEach(will => {total += (parseFloat(will.percent))})
                     
                     for (let i = 0; i < wills.length; i++){
@@ -122,12 +145,12 @@
                 }
 
                 function calculateProbabilityMatrix(individualPercentages){
-                    var percentages = []
+                    let percentages = []
                     for (let x = 0; x < individualPercentages.length; x++){
                         percentages[x] = []
-                        var remaining = 1 - individualPercentages[x]
+                        let remaining = 1 - individualPercentages[x]
                         for (let y = 0; y < individualPercentages.length; y++){
-                            var yProb = 0
+                            let yProb = 0
                             if (x != y){
                                 yProb = individualPercentages[y]/remaining
                             }
@@ -138,15 +161,15 @@
                 }
 
                 function calculate3DProbabilityMatrix(individualPercentages){
-                    var percentages = []
+                    let percentages = []
                     for (let x = 0; x < individualPercentages.length; x++){
                         percentages[x] = []
-                        var xProb = individualPercentages[x]
-                        var remaining = 1 - individualPercentages[x]
+                        let xProb = individualPercentages[x]
+                        let remaining = 1 - individualPercentages[x]
                         for (let y = 0; y < individualPercentages.length; y++){
                             percentages[x][y] = []
-                            var stillRemaining = remaining - individualPercentages[y]
-                            var yProb = 0
+                            let stillRemaining = remaining - individualPercentages[y]
+                            let yProb = 0
                             if (x != y){
                                 yProb = individualPercentages[y]/remaining
                             }
@@ -162,10 +185,24 @@
                     return percentages
                 }
 
+                function calculateOrderedCombinationProbabilities(wills, probabilityMatrix)
+                {
+                    let combinations = []
+                    for (let x = 0; x < probabilityMatrix.length-1; x++){
+                        for (let y = x+1; y < probabilityMatrix.length; y++){
+                            let entry = {}
+                            entry.combination = [wills[x].id,wills[y].id]
+                            entry.value = probabilityMatrix[x][y] + probabilityMatrix[y][x]
+                            combinations.push(entry)
+                        }
+                    }
+                    return combinations
+                }
+
                 function calculate2ndPickProbabilities(probabilityMatrix){
-                    var pickProbabilities = []
+                    let pickProbabilities = []
                     for (let y = 0; y < probabilityMatrix.length; y++){
-                        var pickProbability = 0
+                        let pickProbability = 0
                         for (let x = 0; x < probabilityMatrix.length; x++){
                             pickProbability += probabilityMatrix[x][y]
                         }
@@ -175,8 +212,17 @@
                 }
 
                 function round(toBeRounded, decimalPlaces){
-                    var multiplier = Math.pow(10, decimalPlaces)
+                    let multiplier = Math.pow(10, decimalPlaces)
                     return Math.round(toBeRounded * multiplier) / multiplier
+                }
+
+                function getCombinationDisplayString(combinationIds){
+                    let comboString = willNames[combinationIds[0]]
+                    for (i = 1; i < combinationIds.length; i++){
+                        comboString += ", "
+                        comboString += willNames[combinationIds[i]]
+                    }
+                    return comboString
                 }
 
             </script>
