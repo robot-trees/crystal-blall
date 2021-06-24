@@ -10,16 +10,19 @@
                     font-family: arial;
                 }
                 table, th, td{
-                    border: 1px solid black;
+                    /* border: 1px solid black; */
+                }
+                th{
+                    text-align: right;
                 }
                 td{
-                    text-align: center;
+                    width: 75px;
+                    text-align: right;
                 }
                 table {
                     margin-left: auto;
                     margin-right: auto;
                     border-collapse: collapse;
-                    width: 50%;
                     table-layout: fixed;
                 }
                 div {
@@ -62,7 +65,7 @@
                     // freeWillMatrix.forEach(innerMatrix => printTable(innerMatrix))
 
                     let matrix = calculateProbabilityMatrix(individualPercentages)
-                    printTable(matrix)
+                    // printTable(matrix)
                     
                     let secondPickPercentages = calculate2ndPickProbabilities(matrix)
 
@@ -72,16 +75,17 @@
                     for (let i = 0; i < wills.length; i++){
                         let tableRow = document.createElement('tr')
                         let tableCell = document.createElement('th')
+                        let lessThan = isTiny(wills[i].percent)
                         tableCell.appendChild(document.createTextNode(willNames[wills[i].id]))
                         tableRow.appendChild(tableCell)
                         tableCell = document.createElement('td')
-                        tableCell.appendChild(document.createTextNode(round(wills[i].percent, 2)))
+                        tableCell.appendChild(document.createTextNode(formatPercentage(wills[i].percent), lessThan))
                         tableRow.appendChild(tableCell)
                         tableCell = document.createElement('td')
-                        tableCell.appendChild(document.createTextNode(round(secondPickPercentages[i] * 100, 2)))
+                        tableCell.appendChild(document.createTextNode(formatPercentage(secondPickPercentages[i] * 100, lessThan)))
                         tableRow.appendChild(tableCell)
                         tableCell = document.createElement('td')
-                        tableCell.appendChild(document.createTextNode(round((secondPickPercentages[i] + individualPercentages[i]) * 100, 2)))
+                        tableCell.appendChild(document.createTextNode(formatPercentage((secondPickPercentages[i] + individualPercentages[i]) * 100, lessThan)))
                         tableRow.appendChild(tableCell)
                         tableBody.appendChild(tableRow)
                     }
@@ -99,6 +103,8 @@
                     for (let i = 0; i < 10 && i < orderedCombos.length; i++){
                         let row = document.createElement('tr')
                         let cell = document.createElement('th')
+                        // let lessThan = false
+                        // orderedCombos[i].combination.forEach(willIndex => lessThan |= isTiny(wills[willIndex].percent))
                         cell.appendChild(document.createTextNode(getCombinationDisplayString(orderedCombos[i].combination)))
                         row.appendChild(cell)
                         cell = document.createElement('td')
@@ -136,10 +142,12 @@
                 function getIndividualPercentages(wills){
                     let percentages = []
                     let total = 0
-                    wills.forEach(will => {total += (parseFloat(will.percent))})
+                    wills.forEach(will => {
+                        total += Math.max(parseFloat(will.percent), 0.05)
+                    })
                     
                     for (let i = 0; i < wills.length; i++){
-                        percentages[i] = wills[i].percent / total
+                        percentages[i] = Math.max(parseFloat(wills[i].percent), 0.05) / total
                     }
                     return percentages
                 }
@@ -209,6 +217,21 @@
                         pickProbabilities[y] = pickProbability
                     }
                     return pickProbabilities
+                }
+
+
+                function isTiny(aNumber){
+                    return parseFloat(aNumber) == 0
+                }
+
+                function formatPercentage(percentage, lessThan){
+                    let rounded = percentage == 0 ? 0.05 : percentage
+                    rounded = round(percentage, 2)
+                    let reallyLessThan = lessThan || (rounded == 0)
+                    rounded = (Math.max(round(percentage, 2), 0.05)).toFixed(2)
+                    rounded = reallyLessThan ? '< ' + rounded : ' ' + rounded
+                    rounded.st
+                    return rounded
                 }
 
                 function round(toBeRounded, decimalPlaces){
