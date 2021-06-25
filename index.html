@@ -35,7 +35,10 @@
                 }
                 div {
                     align-content: center;
-                    padding: 10px;
+                    padding-top: 5px;
+                    padding-right: 10px;
+                    padding-left: 10px;
+                    padding-bottom: 10px;
                     margin: auto;
                     background-color: white;
                     display:table;
@@ -44,6 +47,17 @@
                 }
                 .unfixedWidth {
                     width: auto;
+                }
+                .teamHeader {
+                    background-color: #f7d1ff ;
+                    color: #9755A5;
+                    font-size: 30pt;
+                    font-weight: bold;
+                }
+                .divTitle {
+                    margin-left: auto;
+                    margin-right: auto;
+                    font-size: 22pt;
                 }
                 @media only screen and (orientation: portrait) {
                     table {
@@ -56,10 +70,17 @@
             </style>
         </head>
         <body>
+            <div class='teamHeader'>
+                <a>Boston Flowers 🌹</a>
+            </div>
+
             <!-- <div id='matrixDiv'> -->
 
             <!-- </div> -->
             <div id='pickTableDiv'>
+                <div class="divTitle">
+                    <a>Pick Probabilities</a>
+                </div>
             </div>
             <br>
             <div id='comboTableDiv'>
