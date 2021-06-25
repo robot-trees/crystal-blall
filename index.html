@@ -3,41 +3,57 @@
         <head>
             <title>Will Probabilities</title>
             <meta charset="UTF-8">
+            <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' />
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
             <style>
                 body{
                     align-content: center;
-                    font-family: arial;
-                }
-                table, th, td{
-                    /* border: 1px solid black; */
+                    align-items: center;
+                    font-family: "Roboto";
+                    background-color: #f7d1ff;
+                    color: #111;
                 }
                 th{
                     text-align: right;
                 }
                 td{
-                    width: 75px;
+                    width: 90px;
                     text-align: right;
+                    padding-top: 3px;
+                    padding-bottom: 3px;
+                }
+                tr{
+                    border: 1px solid #AAA; 
                 }
                 table {
+                    font-size: 14pt;
                     margin-left: auto;
                     margin-right: auto;
                     border-collapse: collapse;
                     table-layout: fixed;
+                    border-style: hidden;
                 }
                 div {
                     align-content: center;
                     padding: 10px;
+                    margin: auto;
+                    background-color: white;
+                    display:table;
+                    border-radius: 10px;
+                    position: relative;
+                }
+                .unfixedWidth {
+                    width: auto;
                 }
             </style>
         </head>
         <body>
-            <div id='matrixDiv'>
+            <!-- <div id='matrixDiv'> -->
 
-            </div>
+            <!-- </div> -->
             <div id='pickTableDiv'>
-                
             </div>
+            <br>
             <div id='comboTableDiv'>
                 
             </div>
@@ -72,11 +88,28 @@
                     let pickTable = document.createElement('table')
                     let tableBody = document.createElement('tbody')
 
+                    let headerRow = document.createElement('tr')
+                    headerRow.style.border = '2px solid black'
+                    let headerCell = document.createElement('th')
+                    headerCell.appendChild(document.createTextNode('WILL'))
+                    headerRow.appendChild(headerCell)
+                    headerCell = document.createElement('th')
+                    headerCell.appendChild(document.createTextNode('1ST'))
+                    headerRow.appendChild(headerCell)
+                    headerCell = document.createElement('th')
+                    headerCell.appendChild(document.createTextNode('2ND'))
+                    headerRow.appendChild(headerCell)
+                    headerCell = document.createElement('th')
+                    headerCell.appendChild(document.createTextNode('TOTAL'))
+                    headerRow.appendChild(headerCell)
+                    tableBody.appendChild(headerRow)
+
                     for (let i = 0; i < wills.length; i++){
                         let tableRow = document.createElement('tr')
-                        let tableCell = document.createElement('th')
+                        let tableCell = document.createElement('td')
                         let lessThan = isTiny(wills[i].percent)
                         tableCell.appendChild(document.createTextNode(willNames[wills[i].id]))
+                        tableCell.className = 'unfixedWidth'
                         tableRow.appendChild(tableCell)
                         tableCell = document.createElement('td')
                         tableCell.appendChild(document.createTextNode(formatPercentage(wills[i].percent), lessThan))
@@ -230,8 +263,7 @@
                     let reallyLessThan = lessThan || (rounded == 0)
                     rounded = (Math.max(round(percentage, 2), 0.05)).toFixed(2)
                     rounded = reallyLessThan ? '< ' + rounded : ' ' + rounded
-                    rounded.st
-                    return rounded
+                    return rounded + '%'
                 }
 
                 function round(toBeRounded, decimalPlaces){
