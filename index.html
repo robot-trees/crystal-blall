@@ -66,6 +66,12 @@
                     td {
                         width: 135px;
                     }
+                    .divTitle {
+                        font-size: 30pt;
+                    }
+                    .teamHeader{
+                        font-size: 36pt;
+                    }
                 }
             </style>
         </head>
@@ -79,12 +85,14 @@
             <!-- </div> -->
             <div id='pickTableDiv'>
                 <div class="divTitle">
-                    <a>Pick Chances</a>
+                    <a>Will Chances</a>
                 </div>
             </div>
             <br>
             <div id='comboTableDiv'>
-                
+                <div class="divTitle">
+                    <a>Most Likely Outcomes</a>
+                </div>
             </div>
             <script>
 
@@ -162,15 +170,36 @@
 
                     let comboTable = document.createElement('table')
                     let comboTableBody = document.createElement('tbody')
+                    let hdRow = document.createElement('tr')
+                    let hdCell = document.createElement('th')
+                    hdCell.colSpan = 4
+                    hdRow.appendChild(hdCell)
+                    hdRow.style.border = '2px solid black'
+                    comboTableBody.appendChild(hdRow)
                     for (let i = 0; i < 10 && i < orderedCombos.length; i++){
                         let row = document.createElement('tr')
                         let cell = document.createElement('th')
                         // let lessThan = false
                         // orderedCombos[i].combination.forEach(willIndex => lessThan |= isTiny(wills[willIndex].percent))
-                        cell.appendChild(document.createTextNode(getCombinationDisplayString(orderedCombos[i].combination)))
+                        // cell.appendChild(document.createTextNode(getCombinationDisplayString(orderedCombos[i].combination)))
+                        cell.appendChild(document.createTextNode(willNames[orderedCombos[i].combination[0]]))
+                        cell.style.textAlign = 'right'
+                        cell.style.width = 'auto'
                         row.appendChild(cell)
                         cell = document.createElement('td')
-                        cell.appendChild(document.createTextNode(round(orderedCombos[i].value * 100,2)))
+                        cell.appendChild(document.createTextNode(' and '))
+                        cell.style.textAlign = 'center'
+                        cell.style.width = 'auto'
+                        cell.style.paddingLeft = '5px'
+                        cell.style.paddingRight = '5px'
+                        row.appendChild(cell)
+                        cell = document.createElement('th')
+                        cell.appendChild(document.createTextNode(willNames[orderedCombos[i].combination[1]]))
+                        cell.style.textAlign = 'left'
+                        cell.style.width = 'auto'
+                        row.appendChild(cell)
+                        cell = document.createElement('td')
+                        cell.appendChild(document.createTextNode(formatPercentage(orderedCombos[i].value * 100), false))
                         row.appendChild(cell)
                         comboTableBody.appendChild(row)
                     }
