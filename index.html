@@ -176,6 +176,7 @@
                     hdRow.appendChild(hdCell)
                     hdRow.style.border = '2px solid black'
                     comboTableBody.appendChild(hdRow)
+                    let topTenSum = 0
                     for (let i = 0; i < 10 && i < orderedCombos.length; i++){
                         let row = document.createElement('tr')
                         let cell = document.createElement('th')
@@ -199,10 +200,23 @@
                         cell.style.width = 'auto'
                         row.appendChild(cell)
                         cell = document.createElement('td')
+                        topTenSum += (orderedCombos[i].value * 100)
                         cell.appendChild(document.createTextNode(formatPercentage(orderedCombos[i].value * 100), false))
                         row.appendChild(cell)
                         comboTableBody.appendChild(row)
                     }
+
+                    let otherRow = document.createElement('tr')
+                    otherRow.style.border = '2px solid black'
+                    let otherCell = document.createElement('th')
+                    otherCell.colSpan = 3
+                    otherCell.appendChild(document.createTextNode('Other Outcomes'))
+                    otherRow.appendChild(otherCell)
+                    otherCell = document.createElement('td')
+                    otherCell.appendChild(document.createTextNode(formatPercentage(100 - topTenSum, false)))
+                    otherRow.appendChild(otherCell)
+                    comboTableBody.appendChild(otherRow)
+
                     comboTable.appendChild(comboTableBody)
                     document.getElementById('comboTableDiv').appendChild(comboTable)
                 }
