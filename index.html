@@ -10,8 +10,8 @@
                     align-content: center;
                     align-items: center;
                     font-family: "Roboto";
-                    background-color: #111;
-                    color: #EEE;
+                    background-color: #f7d1ff;
+                    color: #111;
                 }
                 th{
                     text-align: right;
@@ -23,7 +23,7 @@
                     padding-bottom: 6px;
                 }
                 tr{
-                    border: 1px solid #888; 
+                    border: 1px solid #AAA; 
                 }
                 table {
                     font-size: 12pt;
@@ -40,7 +40,7 @@
                     padding-left: 10px;
                     padding-bottom: 10px;
                     margin: auto;
-                    background-color: #111;
+                    background-color: white;
                     display:table;
                     border-radius: 10px;
                     position: relative;
@@ -49,8 +49,8 @@
                     width: auto;
                 }
                 .teamHeader {
-                    background-color: #111 ;
-                    color: #f7d1ff;
+                    background-color: #f7d1ff ;
+                    color: #9755A5;
                     font-size: 30pt;
                     font-weight: bold;
                 }
@@ -108,9 +108,6 @@
                 function createTable(electionStats){
 
                     let wills = electionStats.wills
-                    if (wills.length < 2){
-                        return
-                    }
                     wills.sort(function(a,b){
                         return b.percent - a.percent
                     })
@@ -129,7 +126,7 @@
                     let tableBody = document.createElement('tbody')
 
                     let headerRow = document.createElement('tr')
-                    headerRow.style.border = '2px solid white'
+                    headerRow.style.border = '2px solid black'
                     let headerCell = document.createElement('th')
                     headerCell.appendChild(document.createTextNode('WILL'))
                     headerRow.appendChild(headerCell)
@@ -177,7 +174,7 @@
                     let hdCell = document.createElement('th')
                     hdCell.colSpan = 4
                     hdRow.appendChild(hdCell)
-                    hdRow.style.border = '2px solid white'
+                    hdRow.style.border = '2px solid black'
                     comboTableBody.appendChild(hdRow)
                     let topTenSum = 0
                     for (let i = 0; i < 10 && i < orderedCombos.length; i++){
@@ -210,7 +207,7 @@
                     }
 
                     let otherRow = document.createElement('tr')
-                    otherRow.style.border = '2px solid white'
+                    otherRow.style.border = '2px solid black'
                     let otherCell = document.createElement('th')
                     otherCell.colSpan = 3
                     otherCell.appendChild(document.createTextNode('Other Outcomes'))
