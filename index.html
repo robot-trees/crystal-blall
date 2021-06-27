@@ -108,6 +108,9 @@
                 function createTable(electionStats){
 
                     let wills = electionStats.wills
+                    if (wills.length < 2){
+                        return
+                    }
                     wills.sort(function(a,b){
                         return b.percent - a.percent
                     })
