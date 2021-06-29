@@ -324,21 +324,26 @@
                     headerRow.style.border = '2px solid black'
                     let headerCell = document.createElement('th')
                     headerCell.appendChild(document.createTextNode('WILL'))
+                    headerCell.style.paddingRight = '10px'
                     headerRow.appendChild(headerCell)
                     headerCell = document.createElement('th')
                     headerCell.appendChild(document.createTextNode('1ST'))
+                    headerCell.style.paddingRight = '10px'
                     headerRow.appendChild(headerCell)
                     headerCell = document.createElement('th')
                     headerCell.appendChild(document.createTextNode('2ND'))
+                    headerCell.style.paddingRight = '10px'
                     headerRow.appendChild(headerCell)
                     if (thirdPickPercentages != undefined){
                         headerCell = document.createElement('th')
                         headerCell.appendChild(document.createTextNode('3RD'))
+                        headerCell.style.paddingRight = '10px'
                         headerRow.appendChild(headerCell)
                     }
 
                     headerCell = document.createElement('th')
                     headerCell.appendChild(document.createTextNode('TOTAL'))
+                    headerCell.style.paddingRight = '5px'
                     headerRow.appendChild(headerCell)
                     tableBody.appendChild(headerRow)
 
