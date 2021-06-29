@@ -123,7 +123,13 @@ input:checked + .slider:before {
         font-size: 18pt;
     }
     td {
-        width: 135px;
+        width: 120px;
+    }
+    a {
+        font-size: 18pt;
+    }
+    .switch {
+        zoom: 200%
     }
     .divTitle {
         font-size: 30pt;
