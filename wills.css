@@ -129,7 +129,7 @@ input:checked + .slider:before {
         font-size: 18pt;
     }
     .switch {
-        zoom: 200%
+        zoom: 150%;
     }
     .divTitle {
         font-size: 30pt;
