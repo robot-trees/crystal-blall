@@ -59,7 +59,9 @@
                         return b.percent - a.percent
                     })
 
+                    freeWill = location.hash.slice(1) == 'freeWill'
                     if (freeWill){
+                        document.getElementById('freeWillInput').checked = true
                         doThe3DThing()
                     }
                     else {
@@ -75,10 +77,12 @@
                     comboTableDiv.removeChild(document.getElementById('comboTable'))
                     if (freeWill){
                         freeWill = false
+                        location.hash = ''
                         doThe2DThing()
                     }
                     else {
                         freeWill = true
+                        location.hash = 'freeWill'
                         doThe3DThing()
                     }
                     
