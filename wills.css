@@ -67,6 +67,9 @@ strong{
 .controlDiv {
     background-color: transparent;
 }
+.controlLabel {
+    font-weight: bold;
+}
 
 .switch {
     position: relative;
@@ -125,7 +128,7 @@ input:checked + .slider:before {
     td {
         width: 120px;
     }
-    a {
+    .controlLabel {
         font-size: 18pt;
     }
     .switch {
