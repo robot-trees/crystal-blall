@@ -30,10 +30,15 @@
             </div>
             <div class='controlDiv'>
                 <label class="switch">
-                    <input type="checkbox" id="freeWillInput" value="Off" onclick="toggleFreeWill();">
+                    <input type="checkbox" id="freeWillInput" onclick="toggleFreeWill();">
                     <span class="slider"></span>
                 </label>
-                <a class='controlLabel'>Free Will</a>
+                <a class='controlLabel' style="padding-right: 30px;">Free Will</a>
+                <label class="switch">
+                    <input type="checkbox" id="ignoreOrderInput" checked='true' onclick="toggleOrdered();">
+                    <span class="slider"></span>
+                </label>
+                <a class='controlLabel'>Ignore Will Order</a>
             </div>
             <script>
 
@@ -41,7 +46,9 @@
 
                 let willNames = []
                 let wills = []
+                var theMatrix = []
                 let freeWill = false
+                let orderedWills = false
 
                 $.getJSON("https://api.sibr.dev/proxy/database/offseasonSetup", populateWillNames)
 
@@ -59,7 +66,12 @@
                         return b.percent - a.percent
                     })
 
-                    freeWill = location.hash.slice(1) == 'freeWill'
+                    let options = location.hash.slice(1).split('/')
+                    freeWill = options.includes('freeWill')
+                    orderedWills = options.includes('ordered')
+                    if (orderedWills){
+                        document.getElementById('ignoreOrderInput').checked = false
+                    }
                     if (freeWill){
                         document.getElementById('freeWillInput').checked = true
                         doThe3DThing()
@@ -69,55 +81,80 @@
                     }
                 }
 
+                function reHash()
+                {
+                    let hashString = ''
+                    if (freeWill && orderedWills){
+                        hashString = 'freeWill/ordered'
+                    }
+                    else if (freeWill){
+                        hashString = 'freeWill'
+                    }
+                    else if (orderedWills){
+                        hashString = 'ordered'
+                    }
+                    location.hash = hashString
+                }
+
                 function toggleFreeWill(){
                     let freeWillButton = document.getElementById("freeWillInput")
                     let pickTableDiv = document.getElementById('pickTableDiv')
                     pickTableDiv.removeChild(document.getElementById('pickTable'))
                     let comboTableDiv = document.getElementById('comboTableDiv')
                     comboTableDiv.removeChild(document.getElementById('comboTable'))
+                    freeWill = !freeWill
+                    reHash()
                     if (freeWill){
-                        freeWill = false
-                        location.hash = ''
-                        doThe2DThing()
-                    }
-                    else {
-                        freeWill = true
-                        location.hash = 'freeWill'
                         doThe3DThing()
                     }
-                    
+                    else {
+                        doThe2DThing()
+                    }
+                }
+
+                function toggleOrdered(){
+                    orderedWills = !orderedWills
+                    reHash()
+                    recreateOutcomeTable()
                 }
 
                 function doThe3DThing(){
+                    if (wills.length < 3){
+                        return
+                    }
                     let individualPercentages = getIndividualPercentages()
-                    let matrix = calculate3DProbabilityMatrix(individualPercentages)
-                    let secondPickPercentages = calculate2ndPickProbabilities(matrix)
-                    let thirdPickPercentages = calculate3rdPickProbabilities(matrix)
+                    calculateTheMatrix(individualPercentages)
+                    let secondPickPercentages = calculate2ndPickProbabilities(theMatrix)
+                    let thirdPickPercentages = calculate3rdPickProbabilities(theMatrix)
 
                     createWillChanceTable(individualPercentages, secondPickPercentages, thirdPickPercentages)
 
-                    let orderedCombos = calculateOrderedCombinationProbabilities(matrix)
+                    let combos = calculateCombinationProbabilities(theMatrix)
 
-                    createComboTable(orderedCombos)
+                    createComboTable(combos, orderedWills)
                 }
 
                 function doThe2DThing(){
-
+                    if (wills.length < 2){
+                        return
+                    }
                     let individualPercentages = getIndividualPercentages()
-                    
-                    // var freeWillMatrix = calculate3DProbabilityMatrix(individualPercentages)
-                    // freeWillMatrix.forEach(innerMatrix => printTable(innerMatrix))
-
-                    let matrix = calculateProbabilityMatrix(individualPercentages)
-                    // printTable(matrix)
-                    
-                    let secondPickPercentages = calculate2ndPickProbabilities(matrix)
+                    calculateTheMatrix(individualPercentages)
+                    let secondPickPercentages = calculate2ndPickProbabilities(theMatrix)
 
                     createWillChanceTable(individualPercentages, secondPickPercentages)
 
-                    let orderedCombos = calculateOrderedCombinationProbabilities(matrix)
+                    let combos = calculateCombinationProbabilities(theMatrix)
                     
-                    createComboTable(orderedCombos)
+                    createComboTable(combos, orderedWills)
+                }
+
+                function recreateOutcomeTable(){
+                    let comboTableDiv = document.getElementById('comboTableDiv')
+                    comboTableDiv.removeChild(document.getElementById('comboTable'))
+
+                    let combos = calculateCombinationProbabilities(theMatrix)
+                    createComboTable(combos, orderedWills)
                 }
 
                 function populateWillNames(offSeasonData){
@@ -154,6 +191,15 @@
                         percentages[i] = Math.max(parseFloat(wills[i].percent), 0.05) / total
                     }
                     return percentages
+                }
+
+                function calculateTheMatrix(individualPercentages){
+                    if (freeWill && wills.length > 2){
+                        theMatrix = calculate3DProbabilityMatrix(individualPercentages)
+                    }
+                    else if (wills.length > 1){
+                        theMatrix = calculateProbabilityMatrix(individualPercentages)
+                    }
                 }
 
                 function calculateProbabilityMatrix(individualPercentages){
@@ -197,13 +243,58 @@
                     return percentages
                 }
 
+                function calculateCombinationProbabilities(probabilityMatrix){
+                    if (orderedWills){
+                        return calculateOrderedCombinationProbabilities(probabilityMatrix)
+                    }
+                    else {
+                        return calculateUnorderedCombinationProbabilities(probabilityMatrix)
+                    }
+                }
+
                 function calculateOrderedCombinationProbabilities(probabilityMatrix)
+                {
+                    let combinations = []
+                    if (Array.isArray(probabilityMatrix[0][0])){
+                        for (let x = 0; x < probabilityMatrix.length; x++){
+                            for (let y = 0; y < probabilityMatrix.length; y++){
+                                if (x == y){continue}
+                                for (let z = 0; z < probabilityMatrix.length; z++){
+                                    if (x == z || y == z){continue}
+                                    let entry = {}
+                                    entry.combination = [wills[x].id, wills[y].id, wills[z].id]
+                                    entry.value = probabilityMatrix[x][y][z]
+                                    combinations.push(entry)
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        for (let x = 0; x < probabilityMatrix.length; x++){
+                            for (let y = 0; y < probabilityMatrix.length; y++){
+                                if (x == y){continue}
+                                let entry = {}
+                                entry.combination = [wills[x].id,wills[y].id]
+                                entry.value = probabilityMatrix[x][y]
+                                combinations.push(entry)
+                            }
+                        }
+                    }
+                    combinations.sort(function(a,b){
+                        return b.value - a.value
+                    })
+                    return combinations
+                }
+
+                function calculateUnorderedCombinationProbabilities(probabilityMatrix)
                 {
                     let combinations = []
                     if (Array.isArray(probabilityMatrix[0][0])){
                         for (let x = 0; x < probabilityMatrix.length-2; x++){
                             for (let y = x+1; y < probabilityMatrix.length-1; y++){
+                                if (x == y){continue}
                                 for (let z = y+1; z < probabilityMatrix.length; z++){
+                                    if (x == z || y == z){continue}
                                     let entry = {}
                                     entry.combination = [wills[x].id, wills[y].id, wills[z].id]
                                     entry.value = probabilityMatrix[x][y][z] + probabilityMatrix[x][z][y]
@@ -217,6 +308,7 @@
                     else {
                         for (let x = 0; x < probabilityMatrix.length-1; x++){
                             for (let y = x+1; y < probabilityMatrix.length; y++){
+                                if (x == y){continue}
                                 let entry = {}
                                 entry.combination = [wills[x].id,wills[y].id]
                                 entry.value = probabilityMatrix[x][y] + probabilityMatrix[y][x]
@@ -305,14 +397,14 @@
                     return strongElement
                 }
 
-                function createCombinationCell(combination)
+                function createCombinationCell(combination, ordered)
                 {
                     let cell = document.createElement('td')
                     cell.appendChild(createStrongElement(willNames[combination[0]]))
-                    cell.appendChild(document.createTextNode(', '))
+                    cell.appendChild(document.createTextNode(ordered ? ' then ' : ', '))
                     cell.appendChild(document.createTextNode(' '))
                     cell.appendChild(createStrongElement(willNames[combination[1]]))
-                    cell.appendChild(document.createTextNode(' and '))
+                    cell.appendChild(document.createTextNode(ordered ? ' then ' : ' and '))
                     cell.appendChild(createStrongElement(willNames[combination[2]]))
                     cell.style.width = 'auto'
                     return cell
@@ -380,7 +472,7 @@
                     document.getElementById('pickTableDiv').appendChild(pickTable)
                 }
 
-                function createComboTable(orderedCombos)
+                function createComboTable(orderedCombos, ordered)
                 {
                     let comboTable = document.createElement('table')
                     comboTable.id = 'comboTable'
@@ -392,11 +484,12 @@
                     hdRow.appendChild(hdCell)
                     hdRow.style.border = '2px solid black'
                     comboTableBody.appendChild(hdRow)
+                    let separator = ordered ? ' then ' : ' and '
                     let topTenSum = 0
                     if (freeWill){
                         for (let i = 0; i < 10 && i < orderedCombos.length; i++){
                             let row = document.createElement('tr')
-                            row.appendChild(createCombinationCell(orderedCombos[i].combination))
+                            row.appendChild(createCombinationCell(orderedCombos[i].combination, ordered))
                             let cell = document.createElement('td')
                             topTenSum += (orderedCombos[i].value * 100)
                             cell.appendChild(document.createTextNode(formatPercentage(orderedCombos[i].value * 100), false, true))
@@ -413,7 +506,7 @@
                             cell.style.textAlign = 'right'
                             row.appendChild(cell)
                             cell = document.createElement('td')
-                            cell.appendChild(document.createTextNode(' and '))
+                            cell.appendChild(document.createTextNode(separator))
                             cell.style.width = 'auto'
                             cell.style.textAlign = 'center'
                             cell.style.paddingLeft = '5px'
