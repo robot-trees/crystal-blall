@@ -66,7 +66,7 @@
                         return b.percent - a.percent
                     })
 
-                    let options = location.hash.slice(1).split('/')
+                    let options = location.hash.slice(1).split('+')
                     freeWill = options.includes('freeWill')
                     orderedWills = options.includes('ordered')
                     if (orderedWills){
@@ -85,7 +85,7 @@
                 {
                     let hashString = ''
                     if (freeWill && orderedWills){
-                        hashString = 'freeWill/ordered'
+                        hashString = 'freeWill+ordered'
                     }
                     else if (freeWill){
                         hashString = 'freeWill'
